@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="description" content="An easy-to-use scorekeeping app for any game. Keep track of player scores, view game history, and check the leaderboard. Perfect for board games, card games, and more!">
+    <link rel="icon" type="image/png" href="icons/icon-192.png" sizes="192x192">
+    <title>Score Now</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="main.js"></script>
+</head>
+<body>
+  <div id="top-scoreboard" class="scoreboard" role="main"></div>
+  <div id="disk-container" role="figure">
+    <canvas width="600" height="600"></canvas>
+    <span id="pending-score"></span>
+  </div>
+  <div id="bottom-scoreboard" class="scoreboard"></div>
+  
+  <div id="controls">
+    <button id="add-player-btn" class="btn">
+      <i id="add-player-btn-icon" class="fa fa-user-plus"></i>
+      <span id="add-player-btn-text">Player</span>
+    </button>
+    <button id="open-history-btn" class="btn">
+      <i class="fa fa-history"></i>
+      History
+    </button>
+    <button id="open-leaderboard-btn" class="btn">
+      <i class="fa fa-list-ol"></i>
+      Leaderboard
+    </button>
+    <button id="reset-game-btn" class="btn btn-danger">
+      <i class="fa fa-rotate-right"></i>
+      Reset
+    </button>
+  </div>
+
+  <dialog id="add-player-modal">
+    <h2>Add New Player</h2>
+    <button id="close-add-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <input type="text" id="new-player-name-input" name="new-player-name-input" required maxlength="20" placeholder="Player Name">
+    <div class="dialog-buttons">
+      <button id="create-player-btn" class="btn">
+        <i class="fa fa-user-plus"></i>
+        Create
+      </button>
+    </div>
+  </dialog>
+
+  <dialog id="confirm-delete-modal">
+    <h2>Confirm Delete</h2>
+    <button id="close-delete-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <p style="margin-bottom: 10px">Are you sure you want to remove <strong><span id="confirm-delete-player-name"></span></strong>?</p>
+    <div class="dialog-buttons">
+      <button id="cancel-delete-btn" class="btn">
+        <i class="fa fa-times"></i>
+        Cancel
+      </button>
+      <button id="confirm-delete-btn" class="btn btn-danger">
+        <i class="fa fa-trash"></i>
+        Delete
+      </button>
+    </div>
+  </dialog>
+
+  <dialog id="edit-player-modal">
+    <h2>Edit Player</h2>
+    <button id="close-edit-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <input type="text" id="player-name-input" name="player-name-input" required maxlength="20">
+    <div class="dialog-buttons">
+      <button id="save-player-btn" class="btn">
+        <i class="fa-solid fa-floppy-disk"></i>
+        Save
+      </button>
+      <button id="delete-player-btn" class="btn btn-danger">
+        <i class="fa fa-trash"></i>
+        Delete
+    </div>
+  </dialog>
+
+  <dialog id="history-modal">
+    <h2>Game History</h2>
+    <button id="close-history-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <div id="history-entries-container">
+      <div id="history-entries-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="leaderboard-modal">
+    <h2>Leaderboard</h2>
+    <button id="close-leaderboard-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <div id="leaderboard-entries-container">
+      <div id="leaderboard-entries-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="reset-game-modal">
+    <h2>Reset Game</h2>
+    <button id="close-reset-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <p style="margin-bottom: 10px">Are you sure you would like to reset the game? This cannot be undone.</p>
+    <div class="dialog-buttons" style="flex-direction: column; align-items: stretch;">
+      <button id="reset-scores-btn" class="btn btn-danger" style="position: relative">
+        <span class="btn-fill"></span>
+        <i class="fa fa-rotate-right"></i>
+        Reset Scores
+      </button>
+      <button id="full-reset-btn" class="btn btn-danger" style="position: relative">
+        <span class="btn-fill"></span>
+        <i class="fa fa-trash"></i>
+        Delete All Players
+      </button>
+      <button id="cancel-reset-btn" class="btn">
+        <i class="fa fa-times"></i>
+        No! Go Back
+      </button>
+    </div>
+  </dialog>
+
+  <div style="display:none"> <!-- Templates -->
+    <div id="player-template" class="player">
+      <span class="player-name"></span>
+      <span class="player-score"></span>
+    </div>
+    <div id="history-entry-template" class="history-entry">
+      <span class="history-description"></span>
+      <span class="history-timestamp weak"></span>
+    </div>
+    <div id="leaderboard-entry-template" class="leaderboard-entry">
+      <span class="leaderboard-rank"></span>
+      <span class="leaderboard-name"></span>
+      <span class="leaderboard-score"></span>
+    </div>
+    <svg id="ring-template" class="ring" viewBox="0 0 100 100" height="100" width="100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 50, 50 m -45, 0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0" fill="none" stroke="white" stroke-width="10" />
+    </svg>
+  </div>
+</body>
+<footer>
+  <p><a href="https://kroljs.com">Jacob Krol</a> &copy; <span id="copyyear"></span></p>
+</footer>
+</html>
