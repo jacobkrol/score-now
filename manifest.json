@@ -2,7 +2,7 @@
   "name": "Score Now",
   "short_name": "Score Now",
   "description": "A simple, offline-first scorekeeping web app for any game.",
-  "start_url": "/index.html",
+  "start_url": "/score-now/index.html",
   "background_color": "#222222",
   "theme_color": "#f96363",
   "display": "standalone",
