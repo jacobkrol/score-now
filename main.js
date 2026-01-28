@@ -137,8 +137,9 @@ function registerHandlers() {
     const leaderboardEntryTemplate = document.getElementById("leaderboard-entry-template");
     for (let i = 0; i < sortedPlayers.length; i++) {
       const player = sortedPlayers[i];
+      const rank = sortedPlayers.findIndex(p => p.score === player.score) + 1;
       const entryElement = leaderboardEntryTemplate.cloneNode(true);
-      entryElement.querySelector(".leaderboard-rank").innerText = `#${i + 1}`;
+      entryElement.querySelector(".leaderboard-rank").innerText = `#${rank}`;
       entryElement.querySelector(".leaderboard-name").innerText = player.name;
       entryElement.querySelector(".leaderboard-name").style.color = player.color;
       entryElement.querySelector(".leaderboard-score").innerText = player.score;
@@ -448,7 +449,6 @@ function onPointerDown(event) {
 
   for (let i = 0; i < players.length; i++) {
     const angle = players[i].startingPosition * Math.PI / 180;
-    //i * (Math.PI * 2 / players.length);
     const x = canv.width / 2 + Math.cos(angle) * (canv.width / 2 - diskWidth() / 2);
     const y = canv.height / 2 + Math.sin(angle) * (canv.height / 2 - diskWidth() / 2);
     const dx = posX - x;
