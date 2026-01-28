@@ -2,7 +2,7 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox
 
 if (workbox) {
   workbox.routing.registerRoute(
-    ({request}) => ['image', 'script', 'style'].includes(request.destination),
+    () => true,
     new workbox.strategies.StaleWhileRevalidate()
   );
 } else {

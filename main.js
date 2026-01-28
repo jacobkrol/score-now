@@ -26,12 +26,28 @@ const startingPositions = [
 ];
 const playerColors = ["#f96363", "#7a95f1", "#f1d833", "#1cd233", "#ff38f5", "#ff9449", "#46f0f0", "#b0fd1a", "#d2d2d2", "#ca70e5"];
 
+const vibratePatterns = {
+  scoreTick: 1,
+  regButtonPress: 10,
+  longPress: 20,
+  longPressDanger: 120
+};
+
 window.onload = function() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js');
   }
 
   document.getElementById("copyyear").innerText = new Date().getFullYear();
+  fetch('/.VERSION')
+    .then(response => response.text())
+    .then(version => {
+      document.getElementById("version-number").innerText = version.trim();
+    })
+    .catch(error => {
+      console.error('Error fetching version:', error);
+      this.document.getElementById("version-number").innerText = "...";
+    });
 
   canv = document.getElementsByTagName("canvas")[0];
   ctx = canv.getContext("2d");
@@ -62,11 +78,12 @@ window.onload = function() {
 function registerHandlers() {
   // add player
   document.getElementById("add-player-btn").onclick = function() {
-    navigator.vibrate(20);
+    navigator.vibrate(vibratePatterns.regButtonPress);
     const addPlayerModal = document.getElementById("add-player-modal");
     addPlayerModal.showModal();
   }
   document.getElementById("create-player-btn").onclick = () => {
+    navigator.vibrate(vibratePatterns.regButtonPress);
     const playerName = document.getElementById("new-player-name-input").value.trim();
     document.getElementById("new-player-name-input").value = "";
     if (playerName) {
@@ -98,7 +115,7 @@ function registerHandlers() {
 
   // history
   document.getElementById("open-history-btn").onclick = function() {
-    navigator.vibrate(20);
+    navigator.vibrate(vibratePatterns.regButtonPress);
 
     const historyEntriesList = document.getElementById("history-entries-list");
     historyEntriesList.innerHTML = "";
@@ -128,7 +145,7 @@ function registerHandlers() {
 
   // leaderboard
   document.getElementById("open-leaderboard-btn").onclick = function() {
-    navigator.vibrate(20);
+    navigator.vibrate(vibratePatterns.regButtonPress);
 
     const leaderboardEntriesList = document.getElementById("leaderboard-entries-list");
     leaderboardEntriesList.innerHTML = "";
@@ -162,7 +179,7 @@ function registerHandlers() {
 
   // reset
   document.getElementById("reset-game-btn").onclick = function() {
-    navigator.vibrate(20);
+    navigator.vibrate(vibratePatterns.regButtonPress);
     const resetGameModal = document.getElementById("reset-game-modal");
     resetGameModal.showModal();
   };
@@ -293,7 +310,6 @@ function drawBlankDisk() {
 
 function drawPlayerDot(playerIndex, mousePosition = null) {
   const angle = players[playerIndex].startingPosition * Math.PI / 180;
-  //playerIndex * (Math.PI * 2 / players.length);
   const defaultPosition = {
     x: canv.width / 2 + Math.cos(angle) * (canv.width / 2 - diskWidth() / 2),
     y: canv.height / 2 + Math.sin(angle) * (canv.height / 2 - diskWidth() / 2)
@@ -339,7 +355,7 @@ function startPlayerLongPress(event) {
   playerElement.appendChild(ring);
 
   // start timer
-  navigator.vibrate(20);
+  navigator.vibrate(vibratePatterns.longPress);
   event.currentTarget.longPressTimer = setTimeout(() => {
     const editPlayerModal = document.getElementById("edit-player-modal");
     editPlayerModal.showModal();
@@ -347,6 +363,7 @@ function startPlayerLongPress(event) {
 
     // edit player handlers
     document.getElementById("save-player-btn").onclick = () => {
+      navigator.vibrate(vibratePatterns.regButtonPress);
       const newName = document.getElementById("player-name-input").value.trim();
       updatePlayerName(id, newName);
       editPlayerModal.close();
@@ -355,6 +372,7 @@ function startPlayerLongPress(event) {
       editPlayerModal.close();
     };
     document.getElementById("delete-player-btn").onclick = () => {
+      navigator.vibrate(vibratePatterns.regButtonPress);
       const confirmModal = document.getElementById("confirm-delete-modal");
       editPlayerModal.close();
       confirmModal.showModal();
@@ -362,6 +380,7 @@ function startPlayerLongPress(event) {
 
       // confirm delete handlers
       document.getElementById("confirm-delete-btn").onclick = () => {
+        navigator.vibrate(vibratePatterns.regButtonPress);
         const initialPlayer = players.find(p => `player-${p.id}` === id);
         players = players.filter(p => `player-${p.id}` !== id);
         players.forEach((player, index) => {
@@ -409,7 +428,7 @@ function startButtonLongPress(event) {
   fillElement.classList.add("fill");
 
   // start timer
-  navigator.vibrate(20);
+  navigator.vibrate(vibratePatterns.longPressDanger);
   event.currentTarget.longPressTimer = setTimeout(() => {
     if (buttonElement.id === "full-reset-btn") {
       players = [];
@@ -483,7 +502,7 @@ function onPointerMove(event) {
   const rotations = totalRadians / (Math.PI * 2);
   const newScore = Math.floor(rotations * scorePerRotation);
   if (newScore !== pendingScore) {
-    navigator.vibrate(10);
+    navigator.vibrate(vibratePatterns.scoreTick);
   }
   pendingScore = newScore;
 
@@ -509,7 +528,7 @@ function onPointerUp(event) {
 function animateScoreCapture() {
   // ease player dot back to original position
   let startAngle = totalRadians;
-  const planckRadians = 21 * Math.PI * 2 / 360; // < 21 degrees breaks the animation calculation
+  const planckRadians = 21 * Math.PI / 180; // < 21 degrees breaks the animation calculation
   if (Math.abs(totalRadians) < planckRadians) {
     totalRadians = totalRadians >= 0 ? planckRadians : -1 * planckRadians;
     startAngle = totalRadians;
