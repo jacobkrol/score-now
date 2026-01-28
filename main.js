@@ -39,15 +39,6 @@ window.onload = function() {
   }
 
   document.getElementById("copyyear").innerText = new Date().getFullYear();
-  fetch('/.VERSION')
-    .then(response => response.text())
-    .then(version => {
-      document.getElementById("version-number").innerText = version.trim();
-    })
-    .catch(error => {
-      console.error('Error fetching version:', error);
-      this.document.getElementById("version-number").innerText = "...";
-    });
 
   canv = document.getElementsByTagName("canvas")[0];
   ctx = canv.getContext("2d");
