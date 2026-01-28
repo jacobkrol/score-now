@@ -34,6 +34,11 @@ const vibratePatterns = {
 };
 
 window.onload = function() {
+  // remove stray hash (to avoid rendering kroljs.com homepage)
+  if (window.location.hash.length) {
+    window.location.replace(window.location.href.replace(window.location.hash, ""));
+  }
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js');
   }
