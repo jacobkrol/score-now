@@ -4,7 +4,7 @@
   "description": "A simple, offline-first scorekeeping web app for any game.",
   "start_url": "/score-now/index.html",
   "background_color": "#222222",
-  "theme_color": "#f96363",
+  "theme_color": "#666666",
   "display": "standalone",
   "orientation": "portrait",
   "lang": "en-US",
