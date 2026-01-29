@@ -41,7 +41,7 @@ body {
     align-items: center;
     font-size: 20px;
     font-weight: 500;
-    text-shadow: 0 0 3px #11111188;
+    text-shadow: 0 0 5px #11111166;
 
     .player-name {
       text-align: center;
@@ -84,18 +84,17 @@ canvas {
 
 #controls {
   margin: auto 0 10px;
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: max-content max-content;
   gap: 15px;
 
   .btn {
-    padding: 15px 20px;
+    --padding-y: 15px;
+    padding: var(--padding-y) 25px;
     font-size: 18px;
     font-weight: 500;
     border: none;
-    border-radius: 5px;
+    border-radius: calc(0.75rem + var(--padding-y));
     background-color: #444;
     color: #f5f5f5;
     cursor: pointer;
@@ -151,16 +150,17 @@ dialog {
   }
 
   .btn {
+    --padding-y: 10px;
     margin-top: 15px;
-    padding: 10px 15px;
     font-size: 16px;
     font-weight: 500;
     border: none;
-    border-radius: 5px;
     background-color: #444;
     color: #f5f5f5;
     cursor: pointer;
     box-shadow: 0 0 5px #000;
+    padding: var(--padding-y) 22px;
+    border-radius: calc(0.75rem + var(--padding-y));
 
     i {
       margin-right: 8px;
@@ -274,7 +274,7 @@ dialog {
   width: 0%;
   height: 100%;
   background-color: rgba(94, 17, 17, 0.4);
-  border-radius: 5px;
+  border-radius: inherit 5px 5px inherit;
 }
 
 .btn-fill.fill {

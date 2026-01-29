@@ -82,25 +82,23 @@ function registerHandlers() {
     navigator.vibrate(vibratePatterns.regButtonPress);
     const playerName = document.getElementById("new-player-name-input").value.trim();
     document.getElementById("new-player-name-input").value = "";
-    if (playerName) {
-      const color = playerColors.find(color => !players.some(p => p.color === color));
-      const startingPosition = startingPositions[players.length + 1][players.length];
-      const maxId = players.reduce((max, p) => p.id > max ? p.id : max, -1);
-      players.push({id: maxId + 1, score: 0, name: playerName, color: color, startingPosition});
-      players.forEach((player, index) => {
-        player.startingPosition = startingPositions[players.length][index];
-      });
-      if (players.length == 10) {
-        document.getElementById("add-player-btn").disabled = true;
-        document.getElementById("add-player-btn").style.opacity = "0.6";
-        document.getElementById("add-player-btn-text").innerText = "Max Players";
-        document.getElementById("add-player-btn-icon").classList.remove("fa-user-plus");
-        document.getElementById("add-player-btn-icon").classList.add("fa-user-xmark");
-      }
-      history.push({type: "add-player", data: {name: playerName, color}, timestamp: Date.now()});
-      requestAnimationFrame(resetCanvas);
-      updateScoreboards();
+    const color = playerColors.find(color => !players.some(p => p.color === color));
+    const startingPosition = startingPositions[players.length + 1][players.length];
+    const maxId = players.reduce((max, p) => p.id > max ? p.id : max, -1);
+    players.push({id: maxId + 1, score: 0, name: playerName, color: color, startingPosition});
+    players.forEach((player, index) => {
+      player.startingPosition = startingPositions[players.length][index];
+    });
+    if (players.length == 10) {
+      document.getElementById("add-player-btn").disabled = true;
+      document.getElementById("add-player-btn").style.opacity = "0.6";
+      document.getElementById("add-player-btn-text").innerText = "Max Players";
+      document.getElementById("add-player-btn-icon").classList.remove("fa-user-plus");
+      document.getElementById("add-player-btn-icon").classList.add("fa-user-xmark");
     }
+    history.push({type: "add-player", data: {name: playerName, color}, timestamp: Date.now()});
+    requestAnimationFrame(resetCanvas);
+    updateScoreboards();
     const addPlayerModal = document.getElementById("add-player-modal");
     addPlayerModal.close();
   }
@@ -153,7 +151,7 @@ function registerHandlers() {
       const rank = sortedPlayers.findIndex(p => p.score === player.score) + 1;
       const entryElement = leaderboardEntryTemplate.cloneNode(true);
       entryElement.querySelector(".leaderboard-rank").innerText = `#${rank}`;
-      entryElement.querySelector(".leaderboard-name").innerText = player.name;
+      entryElement.querySelector(".leaderboard-name").innerHTML = player.name ? player.name : "<i class='fa fa-user'></i>";
       entryElement.querySelector(".leaderboard-name").style.color = player.color;
       entryElement.querySelector(".leaderboard-score").innerText = player.score;
       leaderboardEntriesList.appendChild(entryElement);
@@ -200,13 +198,13 @@ function registerHandlers() {
 function getHistoryDescription(entry) {
   switch (entry.type) {
     case "add-player":
-      return `Added <strong><span style="color: ${entry.data.color}">${entry.data.name}</span></strong>`;
+      return `Added <strong><span style="color: ${entry.data.color}">${entry.data.name || "<i class='fa fa-user'></i>"}</span></strong>`;
     case "delete-player":
-      return `Removed <strong><span style="color: ${entry.data.color}">${entry.data.name}</span></strong> <span class="weak">(${entry.data.oldScore})</span>`;
+      return `Removed <strong><span style="color: ${entry.data.color}">${entry.data.name || "<i class='fa fa-user'></i>"}</span></strong> <span class="weak">(${entry.data.oldScore})</span>`;
     case "rename-player":
-      return `Renamed <strong><span style="color: ${entry.data.color}">${entry.data.oldName}</span></strong> to <strong><span style="color: ${entry.data.color}">${entry.data.newName}</span></strong>`;
+      return `Renamed <strong><span style="color: ${entry.data.color}">${entry.data.oldName || "<i class='fa fa-user'></i>"}</span></strong> to <strong><span style="color: ${entry.data.color}">${entry.data.newName || "<i class='fa fa-user'></i>"}</span></strong>`;
     case "score-update":
-      return `<strong><span style="color: ${entry.data.color}">${entry.data.playerName}</span></strong> <span class="weak">(${entry.data.oldScore})</span> <strong><span style="color: ${entry.data.color}">${entry.data.pendingScore >= 0 ? "+" : "-"}${Math.abs(entry.data.pendingScore)}</span></strong>`;
+      return `<strong><span style="color: ${entry.data.color}">${entry.data.playerName || "<i class='fa fa-user'></i>"}</span></strong> <span class="weak">(${entry.data.oldScore})</span> <strong><span style="color: ${entry.data.color}">${entry.data.pendingScore >= 0 ? "+" : "-"}${Math.abs(entry.data.pendingScore)}</span></strong>`;
     default:
       return "Unknown action";
   }
@@ -372,7 +370,7 @@ function startPlayerLongPress(event) {
       const confirmModal = document.getElementById("confirm-delete-modal");
       editPlayerModal.close();
       confirmModal.showModal();
-      document.getElementById("confirm-delete-player-name").innerText = initialName;
+      document.getElementById("confirm-delete-player-name").innerText = initialName || "this player";
 
       // confirm delete handlers
       document.getElementById("confirm-delete-btn").onclick = () => {
