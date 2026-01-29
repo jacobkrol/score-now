@@ -257,8 +257,13 @@ dialog {
 }
 
 @keyframes fill-button {
+  95% {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
   to {
     width: 100%;
+    border-radius: inherit;
   }
 }
 
@@ -274,7 +279,9 @@ dialog {
   width: 0%;
   height: 100%;
   background-color: rgba(94, 17, 17, 0.4);
-  border-radius: inherit 5px 5px inherit;
+  border-radius: inherit;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .btn-fill.fill {
