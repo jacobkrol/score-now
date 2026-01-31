@@ -188,10 +188,12 @@ function registerHandlers() {
   resetScoresButton.addEventListener('pointercancel', endButtonLongPress);
 
   document.getElementById("cancel-reset-btn").onclick = () => {
-    document.getElementById("reset-game-modal").close();
+    const resetGameModal = document.getElementById("reset-game-modal");
+    resetGameModal.close();
   };
   document.getElementById("close-reset-modal-btn").onclick = () => {
-    document.getElementById("reset-game-modal").close();
+    const resetGameModal = document.getElementById("reset-game-modal");
+    resetGameModal.close();
   };
 }
 
