@@ -25,6 +25,7 @@ const startingPositions = [
   [202, 158, 236, 124, 270, 90, 304, 56, 338, 22] // 10
 ];
 const playerColors = ["#f96363", "#7a95f1", "#f1d833", "#1cd233", "#ff38f5", "#ff9449", "#46f0f0", "#b0fd1a", "#d2d2d2", "#ca70e5"];
+const rainbowsFor = ["Alyssa"];
 
 const vibratePatterns = {
   scoreTick: 1,
@@ -69,6 +70,23 @@ window.onload = function() {
   
   registerHandlers();
   createGhostPlayers();
+
+  loadActiveGame();
+}
+
+function loadActiveGame() {
+  const savedPlayers = JSON.parse(localStorage.getItem("players") || "[]");
+  const savedHistory = JSON.parse(localStorage.getItem("history") || "[]");
+  if (savedPlayers.length > 0) {
+    players = savedPlayers;
+    history = savedHistory;
+    updateScoreboards();
+  }
+}
+
+function saveActiveGame() {
+  localStorage.setItem("players", JSON.stringify(players));
+  localStorage.setItem("history", JSON.stringify(history));
 }
 
 function registerHandlers() {
@@ -97,6 +115,7 @@ function registerHandlers() {
       document.getElementById("add-player-btn-icon").classList.add("fa-user-xmark");
     }
     history.push({type: "add-player", data: {name: playerName, color}, timestamp: Date.now()});
+    saveActiveGame();
     requestAnimationFrame(resetCanvas);
     updateScoreboards();
     const addPlayerModal = document.getElementById("add-player-modal");
@@ -135,6 +154,122 @@ function registerHandlers() {
   document.getElementById("close-history-modal-btn").onclick = function() {
     const historyModal = document.getElementById("history-modal");
     historyModal.close();
+  }
+  document.getElementById("open-past-games-btn").onclick = function() {
+    navigator.vibrate(vibratePatterns.regButtonPress);
+
+    const pastGamesEntriesList = document.getElementById("past-game-entries-list");
+    pastGamesEntriesList.innerHTML = "";
+
+    const pastGamesEntryTemplate = document.getElementById("past-game-entry-template");
+    const gameScores = JSON.parse(localStorage.getItem("gameScores") || "[]");
+    
+    if (gameScores.length === 0) {
+      const noGamesElem = document.createElement("div");
+      noGamesElem.className = "past-game-entry no-games";
+      noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
+      pastGamesEntriesList.appendChild(noGamesElem);
+    } else {
+      gameScores.sort((a, b) => a.timestamp - b.timestamp);
+      for (let i = gameScores.length - 1; i >= 0; i--) {
+        const game = gameScores[i];
+        const entryElement = pastGamesEntryTemplate.cloneNode(true);
+
+        entryElement.querySelector(".past-game-summary").innerText = `${game.players.length} Player${game.players.length !== 1 ? "s" : ""}`;
+        const formattedTimestamp = new Date(game.timestamp).toLocaleString(undefined, {
+          year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+        });
+        entryElement.querySelector(".past-game-timestamp").innerText = formattedTimestamp
+        entryElement.querySelector(".delete-past-game-btn").onclick = (e) => {
+          navigator.vibrate(vibratePatterns.regButtonPress);
+          const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
+          const messageElem = confirmDeleteModal.querySelector(".message");
+          messageElem.innerText = `Are you sure you want to delete this past game from your history?`;
+          const gameDetailsElem = confirmDeleteModal.querySelector(".game-details");
+          gameDetailsElem.innerText = `${game.players.length} Player${game.players.length !== 1 ? "s" : ""} - ${formattedTimestamp}`;
+          confirmDeleteModal.showModal();
+          document.getElementById("confirm-past-game-delete-btn").onclick = () => {
+            navigator.vibrate(vibratePatterns.regButtonPress);
+            gameScores.splice(i, 1);
+            localStorage.setItem("gameScores", JSON.stringify(gameScores));
+            entryElement.remove();
+            if (gameScores.length === 0) {
+              const noGamesElem = document.createElement("div");
+              noGamesElem.className = "past-game-entry no-games";
+              noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
+              pastGamesEntriesList.appendChild(noGamesElem);
+            }
+            confirmDeleteModal.close();
+          };
+        };
+
+        const scoresListElem = entryElement.querySelector(".past-game-scores-list");
+        game.players.sort((a, b) => b.score - a.score);
+        for (let j = 0; j < game.players.length; j++) {
+          const player = game.players[j];
+          const nameElem = document.createElement("span");
+          nameElem.className = "past-game-score-name";
+          nameElem.style.color = player.color;
+          nameElem.innerHTML = player.name || "<i class='fa fa-user'></i>";
+          const scoreElem = document.createElement("span");
+          scoreElem.className = "past-game-score-value";
+          scoreElem.innerText = player.score;
+          
+          scoresListElem.appendChild(nameElem);
+          scoresListElem.appendChild(scoreElem);
+        }
+        pastGamesEntriesList.appendChild(entryElement);
+      }
+    }
+
+    const historyModal = document.getElementById("history-modal");
+    const pastGamesModal = document.getElementById("past-games-modal");
+    historyModal.close();
+    pastGamesModal.showModal();
+  }
+
+  // past game scores
+  document.getElementById("close-past-games-modal-btn").onclick = function() {
+    const pastGamesModal = document.getElementById("past-games-modal");
+    pastGamesModal.close();
+  }
+  document.getElementById("close-confirm-past-game-delete-modal-btn").onclick = () => {
+    const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
+    confirmDeleteModal.close();
+    const gameDetailsElem = confirmDeleteModal.querySelector(".game-details");
+    gameDetailsElem.innerText = "";
+    gameDetailsElem.classList.remove("empty");
+  }
+  document.getElementById("cancel-past-game-delete-btn").onclick = () => {
+    const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
+    confirmDeleteModal.close();
+    const gameDetailsElem = confirmDeleteModal.querySelector(".game-details");
+    gameDetailsElem.innerText = "";
+    gameDetailsElem.classList.remove("empty");
+  }
+  document.getElementById("clear-past-games-btn").onclick = () => {
+    navigator.vibrate(vibratePatterns.regButtonPress);
+    const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
+    const messageElem = confirmDeleteModal.querySelector(".message");
+    messageElem.innerText = `Are you sure you want to delete all past games from your history?`;
+    const gameDetailsElem = confirmDeleteModal.querySelector(".game-details");
+    gameDetailsElem.classList.add("empty");
+    confirmDeleteModal.showModal();
+    document.getElementById("confirm-past-game-delete-btn").onclick = () => {
+      navigator.vibrate(vibratePatterns.regButtonPress);
+      localStorage.removeItem("gameScores");
+      const pastGamesEntriesList = document.getElementById("past-game-entries-list");
+      pastGamesEntriesList.innerHTML = "";
+      const noGamesElem = document.createElement("div");
+      noGamesElem.className = "past-game-entry no-games";
+      noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
+      pastGamesEntriesList.appendChild(noGamesElem);
+      const dialogButtons = document.querySelector("#past-games-modal .dialog-buttons");
+      dialogButtons.style.display = "none";
+      confirmDeleteModal.close();
+      gameDetailsElem.innerText = "";
+      gameDetailsElem.classList.remove("empty");
+    };
   }
 
   // leaderboard
@@ -304,12 +439,56 @@ function drawBlankDisk() {
   ctx.closePath();
 }
 
-function drawPlayerDot(playerIndex, mousePosition = null) {
-  const angle = players[playerIndex].startingPosition * Math.PI / 180;
+function drawPlayerDot(playerIndex, mousePosition = null, currentAnimatingAngle = null) {
+  const startingPosAngle = players[playerIndex].startingPosition * Math.PI / 180;
+  const diskRadius = canv.width / 2 - diskWidth() / 2;
   const defaultPosition = {
-    x: canv.width / 2 + Math.cos(angle) * (canv.width / 2 - diskWidth() / 2),
-    y: canv.height / 2 + Math.sin(angle) * (canv.height / 2 - diskWidth() / 2)
+    x: canv.width / 2 + Math.cos(startingPosAngle) * diskRadius,
+    y: canv.height / 2 + Math.sin(startingPosAngle) * diskRadius
   };
+
+  // if mouse position, draw trail with gradient along the disk arc from start position to mouse position
+  if (mousePosition) {
+    const currentPosAngle = Math.atan2(mousePosition.y - canv.height / 2, mousePosition.x - canv.width / 2);
+    const angleDelta = shortestAngleDelta(startingPosAngle, currentPosAngle);
+
+    const gradient = ctx.createConicGradient(currentPosAngle, canv.width / 2, canv.height / 2);
+    
+    if (rainbowsFor.includes(players[playerIndex].name)) {
+      gradient.addColorStop(0.100, "#8b00ff");
+      gradient.addColorStop(0.166, "#4b0082");
+      gradient.addColorStop(0.333, "#00ffff");
+      gradient.addColorStop(0.5, "#00ff00");
+      gradient.addColorStop(0.666, "#ffff00");
+      gradient.addColorStop(0.833, "#ff7f00");
+      gradient.addColorStop(0.900, "#ff0000");
+      if (totalRadians > 0) {
+        gradient.addColorStop(0.001, "#8b00ff");
+      } else {
+        gradient.addColorStop(1, "#ff0000");
+      }
+    }
+    if (totalRadians > 0) {
+      gradient.addColorStop(0, players[playerIndex].color + "22");
+      gradient.addColorStop(1, players[playerIndex].color + "ff");
+    } else {
+      gradient.addColorStop(0, players[playerIndex].color + "ff");
+      gradient.addColorStop(1, players[playerIndex].color + "22");
+    }
+
+    
+
+    ctx.strokeStyle = gradient;
+    ctx.beginPath();
+    ctx.lineWidth = diskWidth();
+    ctx.lineCap = "round";
+    const isFullRotation = (isDragging && Math.abs(totalRadians) >= Math.PI * 2) || (currentAnimatingAngle !== null && Math.abs(currentAnimatingAngle) >= Math.PI * 2);
+    ctx.arc(canv.width / 2, canv.height / 2, diskRadius, startingPosAngle + (isFullRotation ? angleDelta + (totalRadians > 0 ? 0.001 : -0.001) : 0), startingPosAngle + angleDelta, totalRadians < 0);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  // draw dot
   ctx.fillStyle = players[playerIndex].color;
   ctx.beginPath();
   ctx.arc(mousePosition?.x ?? defaultPosition.x, mousePosition?.y ?? defaultPosition.y, diskWidth() / 2, 0, Math.PI * 2);
@@ -362,6 +541,7 @@ function startPlayerLongPress(event) {
       navigator.vibrate(vibratePatterns.regButtonPress);
       const newName = document.getElementById("player-name-input").value.trim();
       updatePlayerName(id, newName);
+      saveActiveGame();
       editPlayerModal.close();
     };
     document.getElementById("close-edit-modal-btn").onclick = () => {
@@ -390,6 +570,7 @@ function startPlayerLongPress(event) {
           document.getElementById("add-player-btn-icon").classList.add("fa-user-plus");
         }
         history.push({type: "delete-player", data: {name: initialPlayer.name, color: initialPlayer.color, oldScore: initialPlayer.score}, timestamp: Date.now()});
+        saveActiveGame();
         updateScoreboards();
         requestAnimationFrame(resetCanvas);
         confirmModal.close();
@@ -427,13 +608,21 @@ function startButtonLongPress(event) {
   navigator.vibrate(vibratePatterns.longPressDanger);
   event.currentTarget.longPressTimer = setTimeout(() => {
     if (buttonElement.id === "full-reset-btn") {
+      const pastGames = JSON.parse(localStorage.getItem("gameScores") || "[]");
+      pastGames.push({players: players.map(p => ({name: p.name, color: p.color, score: p.score})), timestamp: Date.now()});
+      localStorage.setItem("gameScores", JSON.stringify(pastGames));
       players = [];
-      history = []; // TODO: preserve final score in history?
+      history = [];
+      saveActiveGame(); // after game reset
       updateScoreboards();
       requestAnimationFrame(resetCanvas);
     } else if (buttonElement.id === "reset-scores-btn") {
+      const pastGames = JSON.parse(localStorage.getItem("gameScores") || "[]");
+      pastGames.push({players: players.map(p => ({name: p.name, color: p.color, score: p.score})), timestamp: Date.now()});
+      localStorage.setItem("gameScores", JSON.stringify(pastGames));
       players.forEach(p => p.score = 0);
       history = [];
+      saveActiveGame(); // after score reset
       updateScoreboards();
       requestAnimationFrame(resetCanvas);
     }
@@ -477,6 +666,9 @@ function onPointerDown(event) {
     pendingScore = 0;
     isDragging = true;
     document.getElementById("pending-score").style.color = players[i].color;
+    document.querySelectorAll(".player:not(#player-" + players[i].id + ")").forEach(elem => {
+      elem.style.opacity = "0.4";
+    });
     break;
   }
 }
@@ -523,13 +715,12 @@ function onPointerUp(event) {
 
 function animateScoreCapture() {
   // ease player dot back to original position
-  let startAngle = totalRadians;
+  const startAngle = totalRadians;
+  const direction = totalRadians >= 0 ? 1 : -1;
   const planckRadians = 21 * Math.PI / 180; // < 21 degrees breaks the animation calculation
   if (Math.abs(totalRadians) < planckRadians) {
-    totalRadians = totalRadians >= 0 ? planckRadians : -1 * planckRadians;
-    startAngle = totalRadians;
+    totalRadians = direction * planckRadians;
   }
-  const direction = totalRadians >= 0 ? 1 : -1;
   const endAngle = 0;
   const duration = Math.log(direction * totalRadians) * 300 + 400; // ms
   const startTime = performance.now();
@@ -545,7 +736,7 @@ function animateScoreCapture() {
       y: canv.height / 2 + Math.sin(currentAngle + playerStartingAngle) * diskRadius
     };
     drawBlankDisk();
-    drawPlayerDot(selectedPlayerIndex, dotPos);
+    drawPlayerDot(selectedPlayerIndex, dotPos, currentAngle);
     if (t < 1) {
       requestAnimationFrame(animate);
     } else {
@@ -556,10 +747,18 @@ function animateScoreCapture() {
 }
 
 function finalizeScoreCapture() {
-  // reset disk
+  // update history and player score
   history.push({type: "score-update", data: {playerName: players[selectedPlayerIndex].name, color: players[selectedPlayerIndex].color, pendingScore, oldScore: players[selectedPlayerIndex].score}, timestamp: Date.now()});
   players[selectedPlayerIndex].score += pendingScore;
+  saveActiveGame();
+
+  // update player score display
   document.getElementById(`player-${players[selectedPlayerIndex].id}`).querySelector(".player-score").innerText = players[selectedPlayerIndex].score;
+  document.querySelectorAll(".player").forEach(elem => {
+    elem.style.opacity = "1.0";
+  });
+
+  // reset state
   selectedPlayerIndex = null;
   isDragging = false;
   pendingScore = 0;

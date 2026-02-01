@@ -44,7 +44,7 @@
     </button>
   </div>
 
-  <dialog id="add-player-modal">
+  <dialog id="add-player-modal"> <!-- Modals -->
     <h2>Add New Player</h2>
     <button id="close-add-modal-btn" class="close-modal-btn">
       <i class="fa fa-times"></i>
@@ -101,6 +101,11 @@
     <div id="history-entries-container">
       <div id="history-entries-list"></div>
     </div>
+    <div class="dialog-buttons">
+      <button id="open-past-games-btn" class="btn">
+        <i class="fa fa-book"></i>
+        Past Games
+      </button>
   </dialog>
 
   <dialog id="leaderboard-modal">
@@ -137,6 +142,41 @@
     </div>
   </dialog>
 
+  <dialog id="past-games-modal">
+    <h2>Game Scores</h2>
+    <button id="close-past-games-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <div id="past-game-entries-container">
+      <div id="past-game-entries-list"></div>
+    </div>
+    <div class="dialog-buttons">
+      <button id="clear-past-games-btn" class="btn btn-danger">
+        <i class="fa fa-trash"></i>
+        Delete All
+      </button>
+    </div>
+  </dialog>
+
+  <dialog id="confirm-past-game-delete-modal">
+    <h2>Confirm Delete</h2>
+    <button id="close-confirm-past-game-delete-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <p class="message"></p>
+    <p class="game-details"></p>
+    <div class="dialog-buttons">
+      <button id="cancel-past-game-delete-btn" class="btn">
+        <i class="fa fa-times"></i>
+        Cancel
+      </button>
+      <button id="confirm-past-game-delete-btn" class="btn btn-danger">
+        <i class="fa fa-trash"></i>
+        Delete
+      </button>
+    </div>
+  </dialog>
+
   <div style="display:none"> <!-- Templates -->
     <div id="player-template" class="player">
       <span class="player-name"></span>
@@ -154,9 +194,22 @@
     <svg id="ring-template" class="ring" viewBox="0 0 100 100" height="100" width="100" xmlns="http://www.w3.org/2000/svg">
       <path d="M 50, 50 m -45, 0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0" fill="none" stroke="white" stroke-width="10" />
     </svg>
+    <div id="past-game-entry-template" class="past-game-entry">
+      <details name="past-game">
+        <summary>
+          <i class="fa fa-chevron-right"></i>
+          <span class="past-game-summary"></span>
+          <span class="past-game-timestamp weak"></span>
+        </summary>
+        <div class="past-game-scores-list"></div>
+      </details>
+      <button class="delete-past-game-btn" data-game-index="0">
+        <i class="fa fa-trash"></i>
+      </button>
+    </div>
   </div>
 </body>
 <footer>
-  <p><a href="https://kroljs.com">Jacob Krol</a> &copy; <span id="copyyear"></span> <span class="weak" style="margin-left: 6px">v1.0.4</span></p>
+  <p><a href="https://kroljs.com">Jacob Krol</a> &copy; <span id="copyyear"></span> <span class="weak" style="margin-left: 6px">v1.1.0</span></p>
 </footer>
 </html>

@@ -42,6 +42,7 @@ body {
     font-size: 20px;
     font-weight: 500;
     text-shadow: 0 0 5px #11111166;
+    transition: opacity 600ms ease;
 
     .player-name {
       text-align: center;
@@ -235,6 +236,112 @@ dialog {
   .history-timestamp {
     font-size: 14px;
     white-space: nowrap;
+  }
+}
+
+#past-games-modal * {
+  touch-action: pan-y;
+  /* -webkit-overflow-scrolling: touch; */
+  --expand-collapse-duration: 600ms;
+}
+
+#past-game-entries-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+:root {
+  interpolate-size: allow-keywords;
+}
+
+.no-games {
+  padding: 15px 5px;
+  font-size: 18px;
+}
+
+#past-games-modal:has(.no-games) .dialog-buttons {
+  display: none;
+}
+
+.past-game-entry:not(.no-games) {
+  border-top: 1px solid #555;
+  border-bottom: 1px solid #555;
+  display: grid;
+  grid-template-columns: 1fr max-content;
+
+  details {
+    overflow: hidden;
+
+    summary {
+      display: grid;
+      grid-template-columns: 25px 1fr;
+      grid-template-rows: min-content 1fr;
+      row-gap: 4px;
+      padding: 10px;
+
+      &::-webkit-details-marker { 
+        display:none; 
+      }
+
+      i {
+        grid-row: span 2;
+        align-self: center;
+        justify-self: center;
+        margin-right: 8px;
+        transition: rotate var(--expand-collapse-duration) ease;
+      }
+    }
+
+    &[open] summary i {
+      rotate: 90deg;
+    }
+
+    .past-game-scores-list {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      column-gap: 12px;
+      row-gap: 6px;
+      overflow: hidden;
+      font-size: 1.1rem;
+      border-top: 1px solid #555;
+      padding: 15px;
+    }
+
+    &::details-content {
+      block-size: 0;
+      transition:
+        block-size var(--expand-collapse-duration) ease,
+        content-visibility var(--expand-collapse-duration) ease;
+      transition-behavior: allow-discrete;
+    }
+
+    &[open]::details-content {
+      block-size: auto;
+    }
+  }
+  
+  .delete-past-game-btn {
+    background: transparent;
+    border: none;
+    color: #f5f5f5;
+    font-size: 18px;
+    cursor: pointer;
+    align-self: flex-start;
+    justify-self: center;
+    padding: 20px 12px;
+  }
+}
+
+#confirm-past-game-delete-modal {
+  .message {
+    margin-bottom: 15px;
+  }
+  .game-details {
+    margin-bottom: 15px;
+
+    &.empty {
+      display: none;
+    }
   }
 }
 
