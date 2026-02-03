@@ -208,8 +208,6 @@ function registerHandlers() {
       noGamesElem.className = "past-game-entry no-games";
       noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
       pastGamesEntriesList.appendChild(noGamesElem);
-      const dialogButtons = document.querySelector("#past-games-modal .dialog-buttons");
-      dialogButtons.style.display = "none";
       confirmDeleteModal.close();
       gameDetailsElem.innerText = "";
       gameDetailsElem.classList.remove("empty");
