@@ -89,15 +89,22 @@ function saveActiveGame() {
   localStorage.setItem("history", JSON.stringify(history));
 }
 
+// vibrate if supported
+function vibrate(pattern) {
+  if (navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
 function registerHandlers() {
   // add player
   document.getElementById("add-player-btn").onclick = function() {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
     const addPlayerModal = document.getElementById("add-player-modal");
     addPlayerModal.showModal();
   }
   document.getElementById("create-player-btn").onclick = () => {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
     const playerName = document.getElementById("new-player-name-input").value.trim();
     document.getElementById("new-player-name-input").value = "";
     const color = playerColors.find(color => !players.some(p => p.color === color));
@@ -128,7 +135,7 @@ function registerHandlers() {
 
   // history
   document.getElementById("open-history-btn").onclick = function() {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
 
     const historyEntriesList = document.getElementById("history-entries-list");
     historyEntriesList.innerHTML = "";
@@ -156,72 +163,9 @@ function registerHandlers() {
     historyModal.close();
   }
   document.getElementById("open-past-games-btn").onclick = function() {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
 
-    const pastGamesEntriesList = document.getElementById("past-game-entries-list");
-    pastGamesEntriesList.innerHTML = "";
-
-    const pastGamesEntryTemplate = document.getElementById("past-game-entry-template");
-    const gameScores = JSON.parse(localStorage.getItem("gameScores") || "[]");
-    
-    if (gameScores.length === 0) {
-      const noGamesElem = document.createElement("div");
-      noGamesElem.className = "past-game-entry no-games";
-      noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
-      pastGamesEntriesList.appendChild(noGamesElem);
-    } else {
-      gameScores.sort((a, b) => a.timestamp - b.timestamp);
-      for (let i = gameScores.length - 1; i >= 0; i--) {
-        const game = gameScores[i];
-        const entryElement = pastGamesEntryTemplate.cloneNode(true);
-
-        entryElement.querySelector(".past-game-summary").innerText = `${game.players.length} Player${game.players.length !== 1 ? "s" : ""}`;
-        const formattedTimestamp = new Date(game.timestamp).toLocaleString(undefined, {
-          year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
-        });
-        entryElement.querySelector(".past-game-timestamp").innerText = formattedTimestamp
-        entryElement.querySelector(".delete-past-game-btn").onclick = (e) => {
-          navigator.vibrate(vibratePatterns.regButtonPress);
-          const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
-          const messageElem = confirmDeleteModal.querySelector(".message");
-          messageElem.innerText = `Are you sure you want to delete this past game from your history?`;
-          const gameDetailsElem = confirmDeleteModal.querySelector(".game-details");
-          gameDetailsElem.innerText = `${game.players.length} Player${game.players.length !== 1 ? "s" : ""} - ${formattedTimestamp}`;
-          confirmDeleteModal.showModal();
-          document.getElementById("confirm-past-game-delete-btn").onclick = () => {
-            navigator.vibrate(vibratePatterns.regButtonPress);
-            gameScores.splice(i, 1);
-            localStorage.setItem("gameScores", JSON.stringify(gameScores));
-            entryElement.remove();
-            if (gameScores.length === 0) {
-              const noGamesElem = document.createElement("div");
-              noGamesElem.className = "past-game-entry no-games";
-              noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
-              pastGamesEntriesList.appendChild(noGamesElem);
-            }
-            confirmDeleteModal.close();
-          };
-        };
-
-        const scoresListElem = entryElement.querySelector(".past-game-scores-list");
-        game.players.sort((a, b) => b.score - a.score);
-        for (let j = 0; j < game.players.length; j++) {
-          const player = game.players[j];
-          const nameElem = document.createElement("span");
-          nameElem.className = "past-game-score-name";
-          nameElem.style.color = player.color;
-          nameElem.innerHTML = player.name || "<i class='fa fa-user'></i>";
-          const scoreElem = document.createElement("span");
-          scoreElem.className = "past-game-score-value";
-          scoreElem.innerText = player.score;
-          
-          scoresListElem.appendChild(nameElem);
-          scoresListElem.appendChild(scoreElem);
-        }
-        pastGamesEntriesList.appendChild(entryElement);
-      }
-    }
-
+    populatePastGamesEntries();
     const historyModal = document.getElementById("history-modal");
     const pastGamesModal = document.getElementById("past-games-modal");
     historyModal.close();
@@ -248,7 +192,7 @@ function registerHandlers() {
     gameDetailsElem.classList.remove("empty");
   }
   document.getElementById("clear-past-games-btn").onclick = () => {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
     const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
     const messageElem = confirmDeleteModal.querySelector(".message");
     messageElem.innerText = `Are you sure you want to delete all past games from your history?`;
@@ -256,7 +200,7 @@ function registerHandlers() {
     gameDetailsElem.classList.add("empty");
     confirmDeleteModal.showModal();
     document.getElementById("confirm-past-game-delete-btn").onclick = () => {
-      navigator.vibrate(vibratePatterns.regButtonPress);
+      vibrate(vibratePatterns.regButtonPress);
       localStorage.removeItem("gameScores");
       const pastGamesEntriesList = document.getElementById("past-game-entries-list");
       pastGamesEntriesList.innerHTML = "";
@@ -272,9 +216,10 @@ function registerHandlers() {
     };
   }
 
+
   // leaderboard
   document.getElementById("open-leaderboard-btn").onclick = function() {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
 
     const leaderboardEntriesList = document.getElementById("leaderboard-entries-list");
     leaderboardEntriesList.innerHTML = "";
@@ -308,7 +253,7 @@ function registerHandlers() {
 
   // reset
   document.getElementById("reset-game-btn").onclick = function() {
-    navigator.vibrate(vibratePatterns.regButtonPress);
+    vibrate(vibratePatterns.regButtonPress);
     const resetGameModal = document.getElementById("reset-game-modal");
     resetGameModal.showModal();
   };
@@ -344,6 +289,121 @@ function getHistoryDescription(entry) {
       return `<strong><span style="color: ${entry.data.color}">${entry.data.playerName || "<i class='fa fa-user'></i>"}</span></strong> <span class="weak">(${entry.data.oldScore})</span> <strong><span style="color: ${entry.data.color}">${entry.data.pendingScore >= 0 ? "+" : "-"}${Math.abs(entry.data.pendingScore)}</span></strong>`;
     default:
       return "Unknown action";
+  }
+}
+
+function populatePastGamesEntries(gameIdToOpen = null) {
+  const pastGamesEntriesList = document.getElementById("past-game-entries-list");
+  pastGamesEntriesList.innerHTML = "";
+
+  const pastGamesEntryTemplate = document.getElementById("past-game-entry-template");
+  const gameScores = JSON.parse(localStorage.getItem("gameScores") || "[]");
+  
+  if (gameScores.length === 0) {
+    const noGamesElem = document.createElement("div");
+    noGamesElem.className = "past-game-entry no-games";
+    noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
+    pastGamesEntriesList.appendChild(noGamesElem);
+  } else {
+    gameScores.sort((a, b) => a.timestamp - b.timestamp);
+    for (let i = gameScores.length - 1; i >= 0; i--) {
+      const game = gameScores[i];
+      const entryElement = pastGamesEntryTemplate.cloneNode(true);
+
+      entryElement.dataset.gameId = game.id;
+      entryElement.querySelector(".past-game-summary").innerText = game.note || `${game.players.length} Player${game.players.length !== 1 ? "s" : ""}`;
+      const formattedTimestamp = new Date(game.timestamp).toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+      });
+      entryElement.querySelector(".past-game-timestamp").innerText = formattedTimestamp
+      entryElement.querySelector(".delete-past-game-btn").onclick = (e) => {
+        vibrate(vibratePatterns.regButtonPress);
+        const confirmDeleteModal = document.getElementById("confirm-past-game-delete-modal");
+        const messageElem = confirmDeleteModal.querySelector(".message");
+        messageElem.innerText = `Are you sure you want to delete this past game from your history?`;
+        const gameDetailsElem = confirmDeleteModal.querySelector(".game-details");
+        gameDetailsElem.innerText = `${game.note?.length ? game.note : `${game.players.length} Player${game.players.length !== 1 ? "s" : ""}`} - ${formattedTimestamp}`;
+        confirmDeleteModal.showModal();
+        document.getElementById("confirm-past-game-delete-btn").onclick = () => {
+          vibrate(vibratePatterns.regButtonPress);
+          gameScores.splice(i, 1);
+          localStorage.setItem("gameScores", JSON.stringify(gameScores));
+          entryElement.remove();
+          if (gameScores.length === 0) {
+            const noGamesElem = document.createElement("div");
+            noGamesElem.className = "past-game-entry no-games";
+            noGamesElem.innerHTML = `<span class="past-game-summary">No past games recorded</span>`;
+            pastGamesEntriesList.appendChild(noGamesElem);
+          }
+          confirmDeleteModal.close();
+        };
+      };
+      entryElement.querySelector(".open-past-game-note-btn").onclick = (e) => {
+        vibrate(vibratePatterns.regButtonPress);
+        const pastGameNoteModal = document.getElementById("past-game-note-modal");
+        const noteInput = document.getElementById("past-game-note-input");
+        const latestGameScores = JSON.parse(localStorage.getItem("gameScores") || "[]");
+        const latestNote = latestGameScores.find(g => g.id === game.id)?.note || "";
+        noteInput.value = latestNote;
+        noteInput.dataset.gameId = game.id;
+        pastGameNoteModal.showModal();
+      };
+      document.getElementById("save-past-game-note-btn").onclick = (e) => {
+        vibrate(vibratePatterns.regButtonPress);
+        const pastGameNoteModal = document.getElementById("past-game-note-modal");
+        const noteInput = document.getElementById("past-game-note-input");
+        const gameId = noteInput.dataset.gameId;
+        const latestGameScores = JSON.parse(localStorage.getItem("gameScores") || "[]");
+        const game = latestGameScores.find(g => g.id === gameId);
+        game.note = noteInput.value.trim();
+        localStorage.setItem("gameScores", JSON.stringify(latestGameScores));
+        populatePastGamesEntries(game.id);
+        pastGameNoteModal.close();
+      };
+      document.getElementById("close-past-game-note-modal-btn").onclick = (e) => {
+        const pastGameNoteModal = document.getElementById("past-game-note-modal");
+        pastGameNoteModal.close();
+      };
+      document.getElementById("remove-past-game-note-btn").onclick = (e) => {
+        vibrate(vibratePatterns.regButtonPress);
+        const pastGameNoteModal = document.getElementById("past-game-note-modal");
+        const noteInput = document.getElementById("past-game-note-input");
+        const gameId = noteInput.dataset.gameId;
+        const latestGameScores = JSON.parse(localStorage.getItem("gameScores") || "[]");
+        const game = latestGameScores.find(g => g.id === gameId);
+        game.note = "";
+        localStorage.setItem("gameScores", JSON.stringify(latestGameScores));
+        populatePastGamesEntries(game.id);
+        pastGameNoteModal.close();
+      };
+
+      const scoresListElem = entryElement.querySelector(".past-game-scores-list");
+      game.players.sort((a, b) => b.score - a.score);
+      for (let j = 0; j < game.players.length; j++) {
+        const player = game.players[j];
+        const nameElem = document.createElement("span");
+        nameElem.className = "past-game-score-name";
+        nameElem.style.color = player.color;
+        nameElem.innerHTML = player.name || "<i class='fa fa-user'></i>";
+        const scoreElem = document.createElement("span");
+        scoreElem.className = "past-game-score-value";
+        scoreElem.innerText = player.score;
+        
+        scoresListElem.appendChild(nameElem);
+        scoresListElem.appendChild(scoreElem);
+      }
+
+      pastGamesEntriesList.appendChild(entryElement);
+    }
+
+    if (gameIdToOpen !== null) {
+      const entries = pastGamesEntriesList.getElementsByClassName("past-game-entry");
+      const gameToOpen = Array.from(entries).find(entry => entry.dataset.gameId === gameIdToOpen);
+      if (gameToOpen) {
+        gameToOpen.querySelector("details").open = true;
+        gameToOpen.scrollIntoView({behavior: "smooth", block: "center"});
+      }
+    }
   }
 }
 
@@ -530,7 +590,7 @@ function startPlayerLongPress(event) {
   playerElement.appendChild(ring);
 
   // start timer
-  navigator.vibrate(vibratePatterns.longPress);
+  vibrate(vibratePatterns.longPress);
   event.currentTarget.longPressTimer = setTimeout(() => {
     const editPlayerModal = document.getElementById("edit-player-modal");
     editPlayerModal.showModal();
@@ -538,7 +598,7 @@ function startPlayerLongPress(event) {
 
     // edit player handlers
     document.getElementById("save-player-btn").onclick = () => {
-      navigator.vibrate(vibratePatterns.regButtonPress);
+      vibrate(vibratePatterns.regButtonPress);
       const newName = document.getElementById("player-name-input").value.trim();
       updatePlayerName(id, newName);
       saveActiveGame();
@@ -548,7 +608,7 @@ function startPlayerLongPress(event) {
       editPlayerModal.close();
     };
     document.getElementById("delete-player-btn").onclick = () => {
-      navigator.vibrate(vibratePatterns.regButtonPress);
+      vibrate(vibratePatterns.regButtonPress);
       const confirmModal = document.getElementById("confirm-delete-modal");
       editPlayerModal.close();
       confirmModal.showModal();
@@ -556,7 +616,7 @@ function startPlayerLongPress(event) {
 
       // confirm delete handlers
       document.getElementById("confirm-delete-btn").onclick = () => {
-        navigator.vibrate(vibratePatterns.regButtonPress);
+        vibrate(vibratePatterns.regButtonPress);
         const initialPlayer = players.find(p => `player-${p.id}` === id);
         players = players.filter(p => `player-${p.id}` !== id);
         players.forEach((player, index) => {
@@ -596,6 +656,14 @@ function endPlayerLongPress(event) {
   }
 }
 
+// ~10 billion games before collision chance is 1%
+// https://www.wolframalpha.com/input?i2d=true&i=Log%5BDivide%5BPower%5B36%2C6%5D-1%2CPower%5B36%2C6%5D%5D%2C0.01%5D
+function generateGameId() {
+  return 'xxxxxx'.replace(/[x]/g, function() {
+    return (Math.random() * 36 | 0).toString(36);
+  });
+}
+
 function startButtonLongPress(event) {
   const longPressDuration = 1200; // ms
   // fill background left to right over duration
@@ -605,11 +673,11 @@ function startButtonLongPress(event) {
   fillElement.classList.add("fill");
 
   // start timer
-  navigator.vibrate(vibratePatterns.longPressDanger);
+  vibrate(vibratePatterns.longPressDanger);
   event.currentTarget.longPressTimer = setTimeout(() => {
     if (buttonElement.id === "full-reset-btn") {
       const pastGames = JSON.parse(localStorage.getItem("gameScores") || "[]");
-      pastGames.push({players: players.map(p => ({name: p.name, color: p.color, score: p.score})), timestamp: Date.now()});
+      pastGames.push({id: generateGameId(), players: players.map(p => ({name: p.name, color: p.color, score: p.score})), timestamp: Date.now()});
       localStorage.setItem("gameScores", JSON.stringify(pastGames));
       players = [];
       history = [];
@@ -618,7 +686,7 @@ function startButtonLongPress(event) {
       requestAnimationFrame(resetCanvas);
     } else if (buttonElement.id === "reset-scores-btn") {
       const pastGames = JSON.parse(localStorage.getItem("gameScores") || "[]");
-      pastGames.push({players: players.map(p => ({name: p.name, color: p.color, score: p.score})), timestamp: Date.now()});
+      pastGames.push({id: generateGameId(), players: players.map(p => ({name: p.name, color: p.color, score: p.score})), timestamp: Date.now()});
       localStorage.setItem("gameScores", JSON.stringify(pastGames));
       players.forEach(p => p.score = 0);
       history = [];
@@ -690,7 +758,7 @@ function onPointerMove(event) {
   const rotations = totalRadians / (Math.PI * 2);
   const newScore = Math.floor(rotations * scorePerRotation);
   if (newScore !== pendingScore) {
-    navigator.vibrate(vibratePatterns.scoreTick);
+    vibrate(vibratePatterns.scoreTick);
   }
   pendingScore = newScore;
 

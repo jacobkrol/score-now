@@ -177,6 +177,24 @@
     </div>
   </dialog>
 
+  <dialog id="past-game-note-modal">
+    <h2>Game Note</h2>
+    <button id="close-past-game-note-modal-btn" class="close-modal-btn">
+      <i class="fa fa-times"></i>
+    </button>
+    <input id="past-game-note-input" name="past-game-note-input" type="text" placeholder='Note (e.g., "Scrabble")' maxlength="20">
+    <div class="dialog-buttons">
+      <button id="save-past-game-note-btn" class="btn">
+        <i class="fa-solid fa-floppy-disk"></i>
+        Save
+      </button>
+      <button id="remove-past-game-note-btn" class="btn btn-danger">
+        <i class="fa fa-eraser"></i>
+        Clear
+      </button>
+    </div>
+  </dialog>
+
   <div style="display:none"> <!-- Templates -->
     <div id="player-template" class="player">
       <span class="player-name"></span>
@@ -201,15 +219,24 @@
           <span class="past-game-summary"></span>
           <span class="past-game-timestamp weak"></span>
         </summary>
-        <div class="past-game-scores-list"></div>
+        <div class="past-game-content">
+          <div class="past-game-scores-list"></div>
+          <div class="dialog-buttons">
+            <button class="open-past-game-note-btn btn">
+              <i class="fa fa-sticky-note"></i>
+              Note
+            </button>
+            <button class="delete-past-game-btn btn btn-danger">
+              <i class="fa fa-trash"></i>
+              Delete
+            </button>
+          </div>
+        </div>
       </details>
-      <button class="delete-past-game-btn" data-game-index="0">
-        <i class="fa fa-trash"></i>
-      </button>
     </div>
   </div>
 </body>
 <footer>
-  <p><a href="https://kroljs.com">Jacob Krol</a> &copy; <span id="copyyear"></span> <span class="weak" style="margin-left: 6px">v1.1.0</span></p>
+  <p><a href="https://kroljs.com">Jacob Krol</a> &copy; <span id="copyyear"></span> <span class="weak" style="margin-left: 6px">v1.2.0</span></p>
 </footer>
 </html>
